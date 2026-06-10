@@ -1,0 +1,22 @@
+# LiteLLM proxy config.
+# LiteLLM should not be the raw prompt source of truth in this design.
+
+litellm_settings:
+  callbacks:
+    - otel
+
+  # Keep raw request/response logging off.
+  log_raw_request_response: false
+  turn_off_message_logging: true
+
+  # Prevent callers from disabling logging of non-content observability fields.
+  # Enable only if compatible with company policy.
+  global_disable_no_log_param: true
+
+general_settings:
+  # Do not store prompts/responses in LiteLLM spend logs.
+  store_prompts_in_spend_logs: false
+
+router_settings:
+  # Ensure metadata headers from OpenClaw are preserved when supported by the route.
+  enable_pre_call_checks: true

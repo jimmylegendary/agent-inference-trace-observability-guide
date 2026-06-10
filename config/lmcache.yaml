@@ -1,0 +1,27 @@
+# LMCache config sketch.
+# Adjust field names to the exact LMCache version deployed internally.
+
+enable_kv_events: true
+
+# Recommended when block hashes must be stable across workers.
+pre_caching_hash_algorithm: sha256_cbor_64bit
+
+observability:
+  metrics:
+    enabled: true
+    endpoint: "0.0.0.0:8081"
+  mp:
+    enabled: true
+    event_bus: true
+    tracing: true
+
+trace_recording:
+  enabled: true
+  level: storage
+  output_dir: /var/log/lmcache/traces
+
+storage:
+  # Map these to company tiers.
+  l0: gpu
+  l1: cpu
+  l2: persistent

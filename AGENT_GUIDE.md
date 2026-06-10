@@ -1,0 +1,186 @@
+# AGENT GUIDE
+
+## Mission
+
+Configure an observability path that lets downstream analysis build input traces
+for architecture/workload simulation.
+
+Required correlation chain:
+
+```text
+OpenClaw agent turn
+  -> LiteLLM request
+    -> vLLM request
+      -> LMCache KV/cache operations
+```
+
+## Hard Requirements
+
+1. Propagate W3C trace context.
+2. Generate a stable `openclaw_llm_call_id` before each LiteLLM call.
+3. Use the same value as `x-request-id` where possible.
+4. Capture raw prompt/completion/tool content in OpenClaw only.
+5. Do not capture raw prompt/completion in LiteLLM logs.
+6. Export LiteLLM/vLLM/LMCache timing, token, routing, and cache metadata.
+7. Store request-level detail in traces/events/logs, not Prometheus labels.
+8. Build final input traces by joining records on IDs below.
+
+## Identity Contract
+
+Use these IDs exactly.
+
+| Field | Owner | Purpose |
+| --- | --- | --- |
+| `trace_id` | OpenTelemetry | Same distributed request flow |
+| `openclaw_turn_id` | OpenClaw | One agent turn containing multiple LLM/tool spans |
+| `openclaw_llm_call_id` | OpenClaw | One LLM call inside an agent turn |
+| `x_request_id` | HTTP/vLLM | Request ID visible at vLLM boundary |
+| `litellm_call_id` | LiteLLM | LiteLLM internal request/spend-log ID |
+| `vllm_request_id` | vLLM | vLLM serving request ID/span attribute |
+| `block_hash` | vLLM/LMCache | KV cache block identity |
+| `parent_block_hash` | vLLM/LMCache | KV block lineage |
+
+## Expected Trace Shape
+
+```text
+trace_id = one distributed request flow
+
+OpenClaw span: agent.turn
+  attributes:
+    openclaw.turn_id
+    openclaw.llm_call_id
+    openclaw.content.input_message
+    openclaw.content.prompt
+    openclaw.content.output_message
+
+LiteLLM span: proxy/gateway call
+  attributes:
+    litellm.call_id
+    gen_ai.request.model
+    gen_ai.usage.input_tokens
+    gen_ai.usage.output_tokens
+    metadata.openclaw_llm_call_id
+    metadata.openclaw_turn_id
+  must_not_contain:
+    raw prompt content
+    raw completion content
+
+vLLM span: request/model/worker spans
+  attributes:
+    gen_ai.request.id
+    gen_ai.request.model
+    gen_ai.latency.time_to_first_token
+    gen_ai.latency.time_in_queue
+    gen_ai.usage.prompt_tokens
+    gen_ai.usage.completion_tokens
+
+LMCache events/metrics/traces:
+  keys:
+    block_hash
+    parent_block_hash
+    tier_or_medium
+    operation
+    latency_ms
+```
+
+## Collection Surfaces
+
+### OpenClaw
+
+OpenClaw owns raw content.
+
+Enable:
+
+- raw input messages
+- raw output messages
+- raw system prompt
+- tool inputs
+- tool outputs
+- agent turn sequence
+
+Use [config/openclaw-gateway.env.example](config/openclaw-gateway.env.example)
+and [config/openclaw-observability.example.json](config/openclaw-observability.example.json).
+
+### LiteLLM
+
+LiteLLM does not own raw content in this design.
+
+Enable:
+
+- OTel callback
+- routing metadata
+- usage/cost metadata
+- `litellm.call_id`
+- spend logs without prompt bodies
+
+Disable:
+
+- raw request/response logging
+- prompt storage in spend logs
+- GenAI message-content capture in the LiteLLM process
+
+Use [config/litellm.config.example.yaml](config/litellm.config.example.yaml).
+Apply process environment from [config/litellm.env.example](config/litellm.env.example).
+
+### vLLM
+
+vLLM owns serving behavior.
+
+Enable:
+
+- OTel trace export
+- request ID headers
+- detailed traces only if overhead is acceptable
+- prefix caching
+- KV cache metrics
+- KV events when block lineage is required
+
+Use [config/vllm.env.example](config/vllm.env.example).
+
+### LMCache
+
+LMCache owns cache tier behavior.
+
+Enable:
+
+- metrics
+- KV events
+- MP observability if available
+- storage-level trace recording for simulation replay
+
+Use [config/lmcache.yaml](config/lmcache.yaml).
+
+## Join Algorithm
+
+1. Load OpenClaw spans by `trace_id`.
+2. Extract `openclaw_turn_id` and ordered `openclaw_llm_call_id` values.
+3. Load LiteLLM spans/logs where:
+   - `trace_id` matches, or
+   - `metadata.openclaw_llm_call_id` matches.
+4. Extract `litellm_call_id`, route, model, token/cost usage.
+5. Load vLLM spans where:
+   - `trace_id` matches, or
+   - `gen_ai.request.id` / `x_request_id` matches.
+6. Load KV events by time window and block lineage.
+7. Load LMCache metrics/trace records by request window, block hash, tier, and operation.
+8. Emit records following [schemas/input-trace.schema.json](schemas/input-trace.schema.json).
+
+## Critical Limitations
+
+1. vLLM OTel does not reliably expose request-level cached prefix tokens today.
+2. Prometheus metrics are aggregate signals and cannot be the per-request source of truth.
+3. KV events may not expose every CPU/SSD-tier event in every vLLM/LMCache version.
+4. Use LMCache MP observability/storage trace or a custom subscriber when tier-level truth is required.
+5. Do not put high-cardinality request IDs into Prometheus labels.
+
+## Success Definition
+
+An AI agent has completed setup when it can produce one JSONL record per LLM call
+containing:
+
+- raw prompt/completion from OpenClaw
+- LiteLLM route and call ID
+- vLLM serving latency and token usage
+- cache hit/tier signals from vLLM/LMCache
+- KV block lineage if enabled
+- enough IDs to replay and audit joins

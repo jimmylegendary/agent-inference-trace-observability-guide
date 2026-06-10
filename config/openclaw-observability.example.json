@@ -1,0 +1,34 @@
+{
+  "plugins": {
+    "load": {
+      "paths": ["/opt/openclaw-observability-plugin"]
+    },
+    "entries": {
+      "otel-observability": {
+        "enabled": true,
+        "hooks": {
+          "allowConversationAccess": true
+        },
+        "config": {
+          "endpoint": "http://otel-collector:4318",
+          "protocol": "http",
+          "serviceName": "openclaw-gateway",
+          "traces": true,
+          "metrics": false,
+          "logs": false,
+          "captureContent": {
+            "inputMessages": true,
+            "outputMessages": true,
+            "systemPrompt": true,
+            "toolInputs": true,
+            "toolOutputs": true
+          },
+          "resourceAttributes": {
+            "deployment.environment": "company",
+            "service.role": "agent-gateway"
+          }
+        }
+      }
+    }
+  }
+}
