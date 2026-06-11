@@ -148,7 +148,14 @@ Enable:
 - MP observability if available
 - storage-level trace recording for simulation replay
 
-Use [config/lmcache.yaml](config/lmcache.yaml).
+Choose one deployment path before editing configs:
+
+- Non-MP: [config/non-mp-lmcache.yaml](config/non-mp-lmcache.yaml) and
+  [config/non-mp-vllm.env.example](config/non-mp-vllm.env.example).
+- MP: [config/mp-lmcache-server.env.example](config/mp-lmcache-server.env.example) and
+  [config/mp-vllm.env.example](config/mp-vllm.env.example).
+
+Read [docs/lmcache-deployment-modes.md](docs/lmcache-deployment-modes.md) first.
 
 ## Join Algorithm
 
@@ -161,8 +168,8 @@ Use [config/lmcache.yaml](config/lmcache.yaml).
 5. Load vLLM spans where:
    - `trace_id` matches, or
    - `gen_ai.request.id` / `x_request_id` matches.
-6. Load KV events by time window and block lineage.
-7. Load LMCache metrics/trace records by request window, block hash, tier, and operation.
+6. If using non-MP with vLLM KV events, load KV events by time window and block lineage.
+7. If using MP, load LMCache MP metrics/logging/tracing records by request window, tier, and operation.
 8. Emit records following [schemas/input-trace.schema.json](schemas/input-trace.schema.json).
 
 ## Critical Limitations
@@ -172,6 +179,8 @@ Use [config/lmcache.yaml](config/lmcache.yaml).
 3. KV events may not expose every CPU/SSD-tier event in every vLLM/LMCache version.
 4. Use LMCache MP observability/storage trace or a custom subscriber when tier-level truth is required.
 5. Do not put high-cardinality request IDs into Prometheus labels.
+6. vLLM `--kv-events-config` ZMQ events are directly validated with `LMCacheConnectorV1`.
+   Do not assume `LMCacheMPConnector` emits the same event stream unless verified in the deployed version.
 
 ## Success Definition
 

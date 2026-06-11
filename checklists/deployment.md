@@ -27,14 +27,21 @@
 - [ ] `--otlp-traces-endpoint` configured.
 - [ ] `traceparent` and `tracestate` propagated into vLLM.
 - [ ] `--enable-request-id-headers` enabled if supported by deployed version.
-- [ ] Prefix caching enabled.
+- [ ] For non-MP validation: `LMCacheConnectorV1` used.
+- [ ] For non-MP validation: vLLM `--kv-events-config` enabled if block lineage is required.
+- [ ] For MP production path: `LMCacheMPConnector` used.
+- [ ] Prefix caching policy explicitly chosen and tested with LMCache.
 - [ ] KV metrics enabled if overhead is acceptable.
-- [ ] KV events enabled if block lineage is required.
 
 ## LMCache
 
+- [ ] Deployment mode selected: non-MP or MP.
+- [ ] If non-MP: `enable_kv_events: true`.
+- [ ] If non-MP: `pre_caching_hash_algorithm: sha256_cbor_64bit`.
+- [ ] If MP: `lmcache server` starts before vLLM.
+- [ ] If MP: vLLM uses `LMCacheMPConnector`.
+- [ ] If MP: MP server ZMQ port and HTTP port reachable.
 - [ ] Metrics enabled.
-- [ ] KV events enabled.
 - [ ] Deterministic hash algorithm configured for multi-worker setups.
 - [ ] MP observability enabled if tier-level trace is required.
 - [ ] Storage-level trace recording enabled for simulation replay.

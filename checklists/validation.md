@@ -27,9 +27,11 @@ Run these checks after deployment.
 
 ## Cache Signals
 
+- [ ] Deployment mode is recorded in the validation report.
 - [ ] vLLM metrics expose prefix/KV cache signals.
 - [ ] LMCache metrics expose retrieve/store/lookup counts and latencies.
-- [ ] KV events expose block hashes.
+- [ ] Non-MP path: vLLM KV events expose block hashes.
+- [ ] MP path: LMCache MP metrics/tracing expose tier movement.
 - [ ] Tier-level source of truth exists for L0/L1/L2 movement.
 - [ ] Storage trace recording produces replayable artifacts.
 

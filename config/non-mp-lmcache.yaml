@@ -1,0 +1,14 @@
+# Non-MP / in-process LMCache config.
+# Use with vLLM LMCacheConnectorV1.
+# Best for quick validation and vLLM KV events ZMQ stream.
+
+local_cpu: true
+chunk_size: 256
+
+# Required for LMCache/vLLM KV cache event publishing examples.
+enable_kv_events: true
+
+# Recommended for deterministic block hashes in multi-worker experiments.
+pre_caching_hash_algorithm: sha256_cbor_64bit
+
+# Add storage backend settings here only after the basic event stream works.
