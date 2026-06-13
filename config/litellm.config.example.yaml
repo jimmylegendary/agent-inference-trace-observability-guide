@@ -18,5 +18,17 @@ general_settings:
   store_prompts_in_spend_logs: false
 
 router_settings:
-  # Ensure metadata headers from OpenClaw are preserved when supported by the route.
+  # Official LiteLLM proxy/router setting.
+  # Enables pre-call checks such as context-window filtering and region/order
+  # based routing behavior. This does not by itself preserve custom metadata;
+  # OpenClaw correlation IDs must still be passed through request metadata or
+  # headers and verified in traces/logs.
   enable_pre_call_checks: true
+
+  # Optional pre-call checks are separate from enable_pre_call_checks.
+  # Enable only when the deployed LiteLLM version and use case require them,
+  # for example Responses API encrypted-content affinity or prompt-cache
+  # deployment affinity.
+  #
+  # optional_pre_call_checks:
+  #   - encrypted_content_affinity

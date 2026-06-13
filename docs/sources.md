@@ -6,6 +6,8 @@
 - vLLM prefix caching: https://docs.vllm.ai/en/latest/design/prefix_caching/
 - vLLM KV events config: https://docs.vllm.ai/en/stable/api/vllm/config/kv_events/
 - LiteLLM OTel integration: https://docs.litellm.ai/docs/observability/opentelemetry_integration
+- LiteLLM proxy config settings: https://docs.litellm.ai/docs/proxy/config_settings
+- LiteLLM router pre-call checks: https://docs.litellm.ai/docs/routing
 - LiteLLM raw request/response logging: https://docs.litellm.ai/docs/observability/raw_request_response
 - LiteLLM UI logs: https://docs.litellm.ai/docs/proxy/ui_logs
 - LMCache metrics: https://docs.lmcache.ai/production/observability/metrics.html
