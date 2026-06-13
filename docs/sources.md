@@ -11,6 +11,7 @@
 - LMCache metrics: https://docs.lmcache.ai/production/observability/metrics.html
 - LMCache KV cache events: https://docs.lmcache.ai/production/kv_cache_events.html
 - LMCache quickstart and deployment modes: https://docs.lmcache.ai/getting_started/quickstart.html
+- LMCache server CLI: https://docs.lmcache.ai/cli/server.html
 - LMCache MP quickstart: https://docs.lmcache.ai/mp/quickstart.html
 - LMCache MP configuration: https://docs.lmcache.ai/mp/configuration.html
 - LMCache MP observability: https://docs.lmcache.ai/mp/observability.html

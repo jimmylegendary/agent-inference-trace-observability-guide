@@ -135,7 +135,11 @@ Enable:
 - KV cache metrics
 - KV events when block lineage is required
 
-Use [config/vllm.env.example](config/vllm.env.example).
+Do not use a generic vLLM template. First choose a deployment mode below, then
+apply exactly one of:
+
+- Non-MP validation: [config/non-mp-vllm.env.example](config/non-mp-vllm.env.example).
+- MP production path: [config/mp-vllm.env.example](config/mp-vllm.env.example).
 
 ### LMCache
 
@@ -144,9 +148,9 @@ LMCache owns cache tier behavior.
 Enable:
 
 - metrics
-- KV events
-- MP observability if available
-- storage-level trace recording for simulation replay
+- non-MP KV events only when validating `LMCacheConnectorV1`
+- MP observability when using `LMCacheMPConnector`
+- MP storage-level trace recording for simulation replay when tier-level truth is required
 
 Choose one deployment path before editing configs:
 

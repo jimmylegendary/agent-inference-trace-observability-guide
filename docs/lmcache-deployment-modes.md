@@ -58,6 +58,15 @@ The LMCache MP server default ZMQ port is 5555.
 This ZMQ channel is connector/server communication, not the vLLM kv-events topic.
 ```
 
+Version-specific connector rule:
+
+```text
+For vLLM >= 0.20.0, prefer the LMCache-shipped connector implementation by
+setting kv_connector_module_path="lmcache.integration.vllm.lmcache_mp_connector".
+Without this field, LMCacheMPConnector may resolve to the implementation bundled
+inside vLLM rather than the newer LMCache package implementation.
+```
+
 Current caveat:
 
 ```text
@@ -89,6 +98,8 @@ mode until this is explicitly validated in the target version.
 
 - `lmcache server` is reachable.
 - vLLM connects with `LMCacheMPConnector`.
-- Cache hit stats appear in `KVTransferParams` or response metadata when supported.
+- For vLLM >= 0.20.0, vLLM uses the LMCache-shipped connector module path.
 - MP metrics expose lookup/retrieve/store and L1/L2 behavior.
 - Storage trace recording produces replayable artifacts when enabled.
+- Cache hit stats appear in `KVTransferParams`, response metadata, logs, traces,
+  or storage trace artifacts only if the target version exposes them.
