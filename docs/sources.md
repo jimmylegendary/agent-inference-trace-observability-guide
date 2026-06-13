@@ -5,12 +5,19 @@
 - vLLM metrics design: https://docs.vllm.ai/en/latest/design/metrics/
 - vLLM prefix caching: https://docs.vllm.ai/en/latest/design/prefix_caching/
 - vLLM KV events config: https://docs.vllm.ai/en/stable/api/vllm/config/kv_events/
+- vLLM OpenAI serving request ID source: https://github.com/vllm-project/vllm/blob/main/vllm/entrypoints/openai/engine/serving.py
+- vLLM Request block_hashes source: https://github.com/vllm-project/vllm/blob/main/vllm/v1/request.py
+- vLLM KV cache manager request/block_hash usage: https://github.com/vllm-project/vllm/blob/main/vllm/v1/core/kv_cache_manager.py
+- vLLM LMCacheConnector event source: https://github.com/vllm-project/vllm/blob/main/vllm/distributed/kv_transfer/kv_connector/v1/lmcache_connector.py
 - LiteLLM OTel integration: https://docs.litellm.ai/docs/observability/opentelemetry_integration
 - LiteLLM proxy config settings: https://docs.litellm.ai/docs/proxy/config_settings
 - LiteLLM router pre-call checks: https://docs.litellm.ai/docs/routing
 - LiteLLM raw request/response logging: https://docs.litellm.ai/docs/observability/raw_request_response
 - LiteLLM UI logs: https://docs.litellm.ai/docs/proxy/ui_logs
 - LMCache metrics: https://docs.lmcache.ai/production/observability/metrics.html
+- LMCache configuration metric names: https://docs.lmcache.ai/api_reference/configurations.html
+- LMCache chunk statistics: https://docs.lmcache.ai/production/observability/chunk_statistics.html
+- LMCache local storage request logs: https://docs.lmcache.ai/kv_cache/local_storage.html
 - LMCache KV cache events: https://docs.lmcache.ai/production/kv_cache_events.html
 - LMCache quickstart and deployment modes: https://docs.lmcache.ai/getting_started/quickstart.html
 - LMCache server CLI: https://docs.lmcache.ai/cli/server.html

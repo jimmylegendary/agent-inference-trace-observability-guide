@@ -9,8 +9,10 @@
 | vLLM spans | `trace_id`, `span_id`, `gen_ai.request.id`, latency, usage |
 | vLLM response usage | request id, prompt tokens, completion tokens, cached tokens if present |
 | vLLM KV events | block hashes, parent hashes, token ids, event type, medium if present |
-| LMCache metrics | lookup/retrieve/store counts, hit tokens, latencies, L0/L1/L2 histograms |
+| LMCache request logs | `Reqid`, total tokens, hit tokens, need-to-load tokens when present |
+| LMCache metrics | lookup/retrieve/store counts, latencies, L0/L1/L2 histograms |
 | LMCache traces | storage operation, args, timestamp, trace file path |
+| LMCache chunk statistics | offline chunk hash/reuse artifacts when `file_hash` is enabled |
 
 ## Join Order
 
@@ -31,3 +33,7 @@
 - Mark aggregate-only values with `granularity: aggregate`.
 - Mark request-level values with `granularity: request`.
 - Never put request IDs into Prometheus labels.
+- Treat chunk statistics as offline evidence unless the deployed artifact contains
+  an explicit request ID.
+- Treat a time-window join as inferred unless the record carries a direct
+  `trace_id`, `x_request_id`, `vllm_request_id`, or LMCache `Reqid`.

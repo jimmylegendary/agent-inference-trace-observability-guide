@@ -30,9 +30,10 @@ metadata only.
 
 1. Read [AGENT_GUIDE.md](AGENT_GUIDE.md).
 2. Choose a deployment mode in [docs/lmcache-deployment-modes.md](docs/lmcache-deployment-modes.md).
-3. Apply templates in [config/](config/).
-4. Validate with [checklists/validation.md](checklists/validation.md).
-5. Emit records matching [schemas/input-trace.schema.json](schemas/input-trace.schema.json).
+3. Check hash/request evidence boundaries in [docs/hash-collection-fact-check.md](docs/hash-collection-fact-check.md).
+4. Apply templates in [config/](config/).
+5. Validate with [checklists/validation.md](checklists/validation.md).
+6. Emit records matching [schemas/input-trace.schema.json](schemas/input-trace.schema.json).
 
 ## Public Sources
 

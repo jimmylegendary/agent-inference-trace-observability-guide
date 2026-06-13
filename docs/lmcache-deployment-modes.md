@@ -83,8 +83,14 @@ mode until this is explicitly validated in the target version.
 3. Build the Trace Builder with two adapters:
    - `vllm_kv_events_adapter` for non-MP ZMQ KV event stream.
    - `lmcache_mp_observability_adapter` for MP metrics/logging/tracing.
-4. Use MP mode as the production path.
-5. Keep non-MP as a narrow event-stream test harness.
+4. Add `lmcache_chunk_statistics_adapter` only as offline chunk-reuse/hash
+   evidence, not as a per-request lineage source unless request IDs are present
+   in the deployed artifact.
+5. Use MP mode as the production path.
+6. Keep non-MP as a narrow event-stream test harness.
+7. If complete per-request block-hash lists are mandatory, add a version-pinned
+   instrumentation patch at the vLLM/LMCache boundary and record its exact
+   version in the validation report.
 
 ## Validation Signals
 
@@ -103,3 +109,5 @@ mode until this is explicitly validated in the target version.
 - Storage trace recording produces replayable artifacts when enabled.
 - Cache hit stats appear in `KVTransferParams`, response metadata, logs, traces,
   or storage trace artifacts only if the target version exposes them.
+- Request logs include `Reqid` lines before the Trace Builder marks hit/load
+  counts as request-level.

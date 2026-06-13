@@ -25,6 +25,11 @@ OpenClaw agent turn
 7. Store request-level detail in traces/events/logs, not Prometheus labels.
 8. Build final input traces by joining records on IDs below.
 
+Read [docs/hash-collection-fact-check.md](docs/hash-collection-fact-check.md)
+before adding any model-specific hash collection guide. That document separates
+confirmed request/hash evidence from claims that still need deployment
+validation or instrumentation.
+
 ## Identity Contract
 
 Use these IDs exactly.
@@ -129,7 +134,8 @@ vLLM owns serving behavior.
 Enable:
 
 - OTel trace export
-- request ID headers
+- `X-Request-Id` propagation from upstream clients where possible
+- request ID response headers during validation
 - detailed traces only if overhead is acceptable
 - prefix caching
 - KV cache metrics
@@ -148,9 +154,12 @@ LMCache owns cache tier behavior.
 Enable:
 
 - metrics
+- request hit/load logs where the deployed integration emits `Reqid`
 - non-MP KV events only when validating `LMCacheConnectorV1`
 - MP observability when using `LMCacheMPConnector`
 - MP storage-level trace recording for simulation replay when tier-level truth is required
+- chunk statistics `file_hash` only as offline chunk-reuse/hash evidence, not as
+  a guaranteed per-request block lineage stream
 
 Choose one deployment path before editing configs:
 
@@ -172,9 +181,11 @@ Read [docs/lmcache-deployment-modes.md](docs/lmcache-deployment-modes.md) first.
 5. Load vLLM spans where:
    - `trace_id` matches, or
    - `gen_ai.request.id` / `x_request_id` matches.
-6. If using non-MP with vLLM KV events, load KV events by time window and block lineage.
-7. If using MP, load LMCache MP metrics/logging/tracing records by request window, tier, and operation.
-8. Emit records following [schemas/input-trace.schema.json](schemas/input-trace.schema.json).
+6. Load LMCache request logs by `Reqid` when present.
+7. If using non-MP with vLLM KV events, load KV events by time window and block lineage.
+8. If using MP, load LMCache MP metrics/logging/tracing records by request window, tier, and operation.
+9. If chunk statistics is enabled, attach file-hash artifacts as offline evidence.
+10. Emit records following [schemas/input-trace.schema.json](schemas/input-trace.schema.json).
 
 ## Critical Limitations
 
@@ -185,6 +196,13 @@ Read [docs/lmcache-deployment-modes.md](docs/lmcache-deployment-modes.md) first.
 5. Do not put high-cardinality request IDs into Prometheus labels.
 6. vLLM `--kv-events-config` ZMQ events are directly validated with `LMCacheConnectorV1`.
    Do not assume `LMCacheMPConnector` emits the same event stream unless verified in the deployed version.
+7. Do not describe `LMCacheConnectorV1` as MP mode. MP mode requires
+   `LMCacheMPConnector` plus a running `lmcache server`.
+8. Do not describe LMCache chunk statistics `file_hash` as guaranteed
+   per-request block-hash export.
+9. If complete per-request block-hash lists are a hard simulation requirement,
+   add version-pinned vLLM/LMCache instrumentation and treat stock observability
+   as evidence, not as the whole source of truth.
 
 ## Success Definition
 
